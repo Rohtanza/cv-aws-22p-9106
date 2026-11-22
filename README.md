@@ -79,10 +79,6 @@ Run on the instance (`ec2-user`, connected with EC2 Instance Connect from my own
 
 <!-- DENY_OUTPUT -->
 ```
-Warning: Permanently added '13.51.146.189' (ED25519) to the list of known hosts.
-** WARNING: connection is not using a post-quantum key exchange algorithm.
-** This session may be vulnerable to "store now, decrypt later" attacks.
-** The server may need to be upgraded. See https://openssh.com/pq.html
 + whoami
 ec2-user
 ip-172-31-36-220.eu-north-1.compute.internal
