@@ -1,0 +1,203 @@
+Evidence for CV on AWS - roll 22p-9106
+generated: 2026-11-22T18:44:37Z
+bucket=cv-22p-9106 ec2=http://13.51.146.189 lambda=https://xv6bjoaq5l43foycqzepwmcyrm0pxwzs.lambda-url.eu-north-1.on.aws region=eu-north-1
+
+== caller ==
+$ aws sts get-caller-identity
+{
+    "UserId": "AIDAYJZZOTZ67FGGYL4CY",
+    "Account": "570814275197",
+    "Arn": "arn:aws:iam::570814275197:user/lab-admin"
+}
+
+== public-access ==
+$ aws s3api get-public-access-block --bucket cv-22p-9106
+{
+    "PublicAccessBlockConfiguration": {
+        "BlockPublicAcls": true,
+        "IgnorePublicAcls": true,
+        "BlockPublicPolicy": true,
+        "RestrictPublicBuckets": true
+    }
+}
+
+== versioning ==
+$ aws s3api get-bucket-versioning --bucket cv-22p-9106
+{
+    "Status": "Enabled"
+}
+
+== objects ==
+$ aws s3 ls s3://cv-22p-9106/site/ --recursive
+2026-11-22 23:22:44     109488 site/cv.pdf
+2026-11-22 23:22:36       3830 site/index.html
+2026-11-22 23:22:42       2016 site/style.css
+
+== ec2-policy ==
+$ aws iam get-role-policy --role-name cv-ec2-role-22p-9106 --policy-name cv-ec2-s3-read
+{
+    "RoleName": "cv-ec2-role-22p-9106",
+    "PolicyName": "cv-ec2-s3-read",
+    "PolicyDocument": {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Sid": "ReadSiteObjects",
+                "Effect": "Allow",
+                "Action": "s3:GetObject",
+                "Resource": "arn:aws:s3:::cv-22p-9106/site/*"
+            },
+            {
+                "Sid": "ListOnlySitePrefix",
+                "Effect": "Allow",
+                "Action": "s3:ListBucket",
+                "Resource": "arn:aws:s3:::cv-22p-9106",
+                "Condition": {
+                    "StringEquals": {
+                        "s3:prefix": "site/"
+                    }
+                }
+            }
+        ]
+    }
+}
+$ aws iam list-attached-role-policies --role-name cv-ec2-role-22p-9106
+{
+    "AttachedPolicies": []
+}
+
+== lambda-policy ==
+$ aws iam list-attached-role-policies --role-name cv-lambda-role-22p-9106
+{
+    "AttachedPolicies": [
+        {
+            "PolicyName": "AWSLambdaBasicExecutionRole",
+            "PolicyArn": "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+        }
+    ]
+}
+$ aws iam get-role-policy --role-name cv-lambda-role-22p-9106 --policy-name cv-lambda-s3-read
+{
+    "RoleName": "cv-lambda-role-22p-9106",
+    "PolicyName": "cv-lambda-s3-read",
+    "PolicyDocument": {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Sid": "ReadSiteObjects",
+                "Effect": "Allow",
+                "Action": "s3:GetObject",
+                "Resource": "arn:aws:s3:::cv-22p-9106/site/*"
+            }
+        ]
+    }
+}
+
+== security-group ==
+$ aws ec2 describe-security-groups --group-ids sg-0feb2f03f1fe61d1f --query SecurityGroups[].{GroupId:GroupId,GroupName:GroupName,Inbound:IpPermissions}
+[
+    {
+        "GroupId": "sg-0feb2f03f1fe61d1f",
+        "GroupName": "cv-sg-22p-9106",
+        "Inbound": [
+            {
+                "IpProtocol": "tcp",
+                "FromPort": 80,
+                "ToPort": 80,
+                "UserIdGroupPairs": [],
+                "IpRanges": [
+                    {
+                        "Description": "HTTP from anywhere",
+                        "CidrIp": "0.0.0.0/0"
+                    }
+                ],
+                "Ipv6Ranges": [],
+                "PrefixListIds": []
+            },
+            {
+                "IpProtocol": "tcp",
+                "FromPort": 22,
+                "ToPort": 22,
+                "UserIdGroupPairs": [],
+                "IpRanges": [
+                    {
+                        "Description": "SSH from my IP only",
+                        "CidrIp": "154.208.62.143/32"
+                    }
+                ],
+                "Ipv6Ranges": [],
+                "PrefixListIds": []
+            }
+        ]
+    }
+]
+
+== instance ==
+$ aws ec2 describe-instances --filters Name=tag:Name,Values=cv-ec2-22p-9106 Name=instance-state-name,Values=running --query Reservations[].Instances[].{InstanceId:InstanceId,Type:InstanceType,ImageId:ImageId,PublicIp:PublicIpAddress,HttpTokens:MetadataOptions.HttpTokens,HttpEndpoint:MetadataOptions.HttpEndpoint,InstanceProfile:IamInstanceProfile.Arn,Tags:Tags}
+[
+    {
+        "InstanceId": "i-0e7761a33bff523a2",
+        "Type": "t3.micro",
+        "ImageId": "ami-083dedce92603a2ad",
+        "PublicIp": "13.51.146.189",
+        "HttpTokens": "required",
+        "HttpEndpoint": "enabled",
+        "InstanceProfile": "arn:aws:iam::570814275197:instance-profile/cv-ec2-role-22p-9106",
+        "Tags": [
+            {
+                "Key": "Owner",
+                "Value": "22P-9106"
+            },
+            {
+                "Key": "Course",
+                "Value": "cloud"
+            },
+            {
+                "Key": "Name",
+                "Value": "cv-ec2-22p-9106"
+            }
+        ]
+    }
+]
+
+== endpoints ==
+http://13.51.146.189/                                                       status=200 content_type=text/html; charset=UTF-8
+http://13.51.146.189/style.css                                              status=200 content_type=text/css
+http://13.51.146.189/cv.pdf                                                 status=200 content_type=application/pdf
+https://xv6bjoaq5l43foycqzepwmcyrm0pxwzs.lambda-url.eu-north-1.on.aws/      status=200 content_type=text/html; charset=utf-8
+https://xv6bjoaq5l43foycqzepwmcyrm0pxwzs.lambda-url.eu-north-1.on.aws/style.css status=200 content_type=text/css; charset=utf-8
+https://xv6bjoaq5l43foycqzepwmcyrm0pxwzs.lambda-url.eu-north-1.on.aws/cv.pdf status=200 content_type=application/pdf
+https://xv6bjoaq5l43foycqzepwmcyrm0pxwzs.lambda-url.eu-north-1.on.aws/anything status=404 content_type=text/html; charset=utf-8
+https://cv-22p-9106.s3.eu-north-1.amazonaws.com/site/index.html             status=403 content_type=application/xml
+
+== lambda-logs ==
+$ aws logs tail /aws/lambda/cv-func-22p-9106 --since 1h --format short | tail -n 20
+2026-11-22T18:44:28 START RequestId: 4c297dc3-0176-4486-8f33-a0f6eed6ffc3 Version: $LATEST
+2026-11-22T18:44:28 {"fn": "cv-func-22p-9106", "path": "/nope", "status": 404, "ms": 0.0}
+2026-11-22T18:44:28 END RequestId: 4c297dc3-0176-4486-8f33-a0f6eed6ffc3
+2026-11-22T18:44:28 REPORT RequestId: 4c297dc3-0176-4486-8f33-a0f6eed6ffc3	Duration: 32.99 ms	Billed Duration: 33 ms	Memory Size: 128 MB	Max Memory Used: 96 MB
+2026-11-22T18:45:26 START RequestId: 8e4b8e06-d94a-461d-a78d-745f86cbb9a0 Version: $LATEST
+2026-11-22T18:45:26 {"fn": "cv-func-22p-9106", "path": "/", "status": 200, "ms": 184.0}
+2026-11-22T18:45:26 END RequestId: 8e4b8e06-d94a-461d-a78d-745f86cbb9a0
+2026-11-22T18:45:26 REPORT RequestId: 8e4b8e06-d94a-461d-a78d-745f86cbb9a0	Duration: 213.32 ms	Billed Duration: 214 ms	Memory Size: 128 MB	Max Memory Used: 96 MB
+2026-11-22T18:45:29 START RequestId: da34ab59-5a8e-473e-8f0c-0b44780d22dd Version: $LATEST
+2026-11-22T18:45:29 {"fn": "cv-func-22p-9106", "path": "/style.css", "status": 200, "ms": 24.6}
+2026-11-22T18:45:29 END RequestId: da34ab59-5a8e-473e-8f0c-0b44780d22dd
+2026-11-22T18:45:29 REPORT RequestId: da34ab59-5a8e-473e-8f0c-0b44780d22dd	Duration: 36.60 ms	Billed Duration: 37 ms	Memory Size: 128 MB	Max Memory Used: 96 MB
+2026-11-22T18:45:30 START RequestId: 0d956577-4362-424a-ad6f-6f155ba6f819 Version: $LATEST
+2026-11-22T18:45:30 {"fn": "cv-func-22p-9106", "path": "/cv.pdf", "status": 200, "ms": 35.4}
+2026-11-22T18:45:30 END RequestId: 0d956577-4362-424a-ad6f-6f155ba6f819
+2026-11-22T18:45:30 REPORT RequestId: 0d956577-4362-424a-ad6f-6f155ba6f819	Duration: 37.70 ms	Billed Duration: 38 ms	Memory Size: 128 MB	Max Memory Used: 96 MB
+2026-11-22T18:45:35 START RequestId: 5f8bedbb-b5e0-4028-a040-3569765194e9 Version: $LATEST
+2026-11-22T18:45:35 {"fn": "cv-func-22p-9106", "path": "/anything", "status": 404, "ms": 0.0}
+2026-11-22T18:45:35 END RequestId: 5f8bedbb-b5e0-4028-a040-3569765194e9
+2026-11-22T18:45:35 REPORT RequestId: 5f8bedbb-b5e0-4028-a040-3569765194e9	Duration: 1.55 ms	Billed Duration: 2 ms	Memory Size: 128 MB	Max Memory Used: 96 MB
+
+== log-retention ==
+$ aws logs describe-log-groups --log-group-name-prefix /aws/lambda/cv-func-22p-9106 --query logGroups[].{logGroupName:logGroupName,retentionInDays:retentionInDays}
+[
+    {
+        "logGroupName": "/aws/lambda/cv-func-22p-9106",
+        "retentionInDays": 7
+    }
+]

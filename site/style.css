@@ -1,0 +1,101 @@
+:root {
+  --ink: #1d2733;
+  --muted: #5b6876;
+  --accent: #16304f;
+  --line: #d9dee4;
+  --paper: #ffffff;
+  --bg: #eef1f4;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 16px/1.55 "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+.cv {
+  max-width: 820px;
+  margin: 32px auto 0;
+  padding: 40px 48px;
+  background: var(--paper);
+  border-top: 6px solid var(--accent);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+h1 { margin: 0; font-size: 2.1rem; color: var(--accent); }
+.role { margin: 4px 0 12px; color: var(--muted); }
+
+.contact {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 20px;
+  font-size: 0.95rem;
+}
+
+a { color: var(--accent); }
+
+.download {
+  display: inline-block;
+  padding: 8px 16px;
+  background: var(--accent);
+  color: #fff;
+  text-decoration: none;
+  border-radius: 4px;
+  font-weight: 600;
+}
+.download:hover { opacity: 0.9; }
+
+section { margin-top: 28px; }
+
+h2 {
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 4px;
+  margin: 0 0 12px;
+}
+
+.item { margin-bottom: 14px; }
+.item-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.item-head h3 { margin: 0; font-size: 1rem; }
+.item-head span { color: var(--muted); font-size: 0.9rem; }
+.item p { margin: 4px 0 0; }
+
+.skills {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 6px 16px;
+  margin: 0;
+}
+.skills dt { font-weight: 600; }
+.skills dd { margin: 0; }
+
+.hosted {
+  max-width: 820px;
+  margin: 0 auto 32px;
+  padding: 12px 48px;
+  background: var(--accent);
+  color: #fff;
+  font-family: ui-monospace, "DejaVu Sans Mono", monospace;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 640px) {
+  .cv { margin-top: 0; padding: 24px 16px; }
+  .hosted { padding: 12px 16px; }
+  .skills { grid-template-columns: 1fr; }
+  .skills dd { margin-bottom: 8px; }
+}
