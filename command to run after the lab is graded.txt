@@ -1,0 +1,1 @@
+bash Working/lab7.sh cleanup
